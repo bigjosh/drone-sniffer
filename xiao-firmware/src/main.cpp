@@ -196,6 +196,9 @@ void print_compact_message(const id_data *UAV) {
     snprintf(msg + len, sizeof(msg) - len, "}");
   }
   Serial1.println(msg);
+#ifdef MIRROR_LINK_TO_USB
+  Serial.printf("[LINK] %s\n", msg);
+#endif
 }
 
 void bleScanTask(void *parameter) {
