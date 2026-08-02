@@ -315,9 +315,9 @@ static void printDump() {
   int m = collectUsed(list);
   for (int n = 0; n < m; n++) {
     DroneRec &d = drones[list[n]];
-    Serial.printf("[DUMP] %d/%d id=%s mac=%s tp=%s rssi=%d age=%lus pilot=%d drone=%d\n",
+    Serial.printf("[DUMP] %d/%d id=%s mac=%s tp=%s ch=%u rssi=%d age=%lus pilot=%d drone=%d\n",
                   n + 1, m, d.id[0] ? d.id : "-", d.mac, d.isBle ? "ble" : "wifi",
-                  d.rssi, (unsigned long)((millis() - d.lastSeen) / 1000),
+                  d.channel, d.rssi, (unsigned long)((millis() - d.lastSeen) / 1000),
                   d.hasPilot, d.hasDrone);
   }
   Serial.printf("[DUMP] count=%d cur=%d\n", m, m ? curPos + 1 : 0);
