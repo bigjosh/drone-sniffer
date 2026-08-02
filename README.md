@@ -21,10 +21,10 @@ Fork of [`colonelpanichacks/drone-mesh-mapper`](https://github.com/colonelpanich
 - UART output is now one JSON line per detection, including the decoded UAS Basic ID (the stock firmware only sent MAC + a maps link):
 
   ```json
-  {"id":"<UAS Basic ID>","mac":"aa:bb:cc:dd:ee:ff","rssi":-67,"tp":"ble","dlat":38.8977,"dlon":-77.0365,"plat":38.8895,"plon":-77.0352}
+  {"id":"<UAS Basic ID>","mac":"aa:bb:cc:dd:ee:ff","rssi":-67,"tp":"wifi","ch":6,"dlat":38.8977,"dlon":-77.0365,"plat":38.8895,"plon":-77.0352}
   ```
 
-  `id` may be empty (drone hasn't broadcast Basic ID yet); `tp` is `ble` or `wifi`; coordinate pairs are omitted until known.
+  `id` may be empty (drone hasn't broadcast Basic ID yet); `tp` is `ble` or `wifi`; `ch` accompanies WiFi detections only; coordinate pairs are omitted until known.
 - Rate limiting is per drone (1 s) instead of one global message per 5 s.
 - Optional build flags: `-DTEST_EMIT` emits three synthetic drones on the UART every 3 s for integration testing without RF; `-DMIRROR_LINK_TO_USB` copies each link JSON line to USB serial so the exact bytes sent to the display can be inspected with the Heltec detached.
 
@@ -38,7 +38,17 @@ USB serial (115200) still prints the full detection JSON per the stock firmware.
 - Screen is rotated 180° (`DISPLAY_ROTATION` at the top of `src/main.cpp` — set `U8G2_R0` for the default orientation).
 - Auto-advances every 4 s; PRG button advances immediately.
 - White LED blinks on every received detection.
-- USB serial (115200) accepts the same JSON lines as the UART — plus `dump`, `reset`, and `backdate N` commands — so the whole UI is testable from a PC.
+- USB serial (115200) accepts the same JSON lines as the UART — plus `dump`, `status`, `reset`, and `backdate N` commands — so the whole UI is testable from a PC.
+
+**Second WiFi receiver.** The Heltec also sniffs WiFi itself, covering the channels the XIAO cannot:
+
+- Sweeps channels 1–5 and 7–11 in a reshuffled order, 1.5 s dwell. Channel 6 is skipped because the XIAO sits there permanently.
+- Receive-only (`WIFI_MODE_NULL`) and filtered to management frames in the driver, so it never transmits and doesn't take an interrupt per data frame.
+- Decoding happens in the WiFi task and results are queued; `loop()` owns the drone table, so there is no lock on shared state.
+- Records merge with XIAO detections by UAS ID, and the channel shown on the transport line identifies the source: **ch 6 = XIAO**, anything else = Heltec's own radio.
+- Build with `-DENABLE_WIFI_SCAN=0` for the display-only firmware.
+
+Note this adds Wi-Fi **Beacon** coverage only. Wi-Fi NAN Remote ID is spec-locked to channel 6, so the XIAO already captures all of it. Both boards are 2.4 GHz only — 5 GHz Remote ID is out of reach either way.
 
 ### `test-transmitter/` — bench test drone (optional)
 

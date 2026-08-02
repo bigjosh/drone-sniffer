@@ -20,6 +20,10 @@
 const int SERIAL1_RX_PIN = 6;
 const int SERIAL1_TX_PIN = 5;
 
+// Fixed listening channel. Also the Wi-Fi NAN social channel, so NAN Remote ID
+// is fully covered here; the Heltec sweeps the others for Beacon-method traffic.
+const int WIFI_CHANNEL = 6;
+
 #define TP_BLE  1
 #define TP_WIFI 2
 
@@ -184,6 +188,9 @@ void print_compact_message(const id_data *UAV) {
                      "{\"id\":\"%s\",\"mac\":\"%s\",\"rssi\":%d,\"tp\":\"%s\"",
                      id_str, mac_str, UAV->rssi,
                      UAV->transport == TP_BLE ? "ble" : "wifi");
+  if (len > 0 && len < (int)sizeof(msg) && UAV->transport != TP_BLE) {
+    len += snprintf(msg + len, sizeof(msg) - len, ",\"ch\":%d", WIFI_CHANNEL);
+  }
   if (len > 0 && len < (int)sizeof(msg) && UAV->lat_d != 0.0 && UAV->long_d != 0.0) {
     len += snprintf(msg + len, sizeof(msg) - len, ",\"dlat\":%.6f,\"dlon\":%.6f",
                     UAV->lat_d, UAV->long_d);
@@ -350,7 +357,7 @@ void setup() {
   
   esp_wifi_set_promiscuous(true);
   esp_wifi_set_promiscuous_rx_cb(&callback);
-  esp_wifi_set_channel(6, WIFI_SECOND_CHAN_NONE);
+  esp_wifi_set_channel(WIFI_CHANNEL, WIFI_SECOND_CHAN_NONE);
   
   BLEDevice::init("DroneID");
   pBLEScan = BLEDevice::getScan();
