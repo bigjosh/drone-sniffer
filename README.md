@@ -12,6 +12,19 @@ A self-contained drone Remote ID sniffer built on the [Colonel Panic Mesh-Detect
 
 The Mesh-Detect carrier wires XIAO GPIO5 (TX) → Heltec GPIO19 (RX) at 115200 8N1. LoRa/Meshtastic is not used.
 
+## Coverage
+
+Both radios are used: the XIAO sniffs BLE and WiFi channel 6, and the Heltec — whose WiFi would otherwise sit idle — sweeps the remaining 2.4 GHz channels, so Beacon-method broadcasts away from channel 6 are caught too.
+
+| Remote ID transport | Caught by | Notes |
+|---|---|---|
+| Bluetooth LE (legacy advertising) | XIAO | |
+| WiFi NAN | XIAO | NAN is spec-locked to channel 6, so this is fully covered |
+| WiFi Beacon, channel 6 | XIAO | |
+| WiFi Beacon, channels 1–5, 7–11 | Heltec hopping scan | up to ~15 s to land on the right channel |
+| Anything on 5 GHz | ✗ | both boards are 2.4 GHz only |
+| Bluetooth 5 Long Range (Coded PHY) | ✗ (unverified) | the scanner uses the default legacy advertising scan |
+
 ## Firmware
 
 ### `xiao-firmware/` — detector (modified upstream)
@@ -85,16 +98,22 @@ python tools/serial_cli.py COM3 --send 'backdate 290' --send wait:15 --send dump
 
 ## Restoring Meshtastic on the Heltec
 
-A byte-exact dump of the original flash (Meshtastic + settings) is in `backups/heltec-meshtastic-full.bin`:
+Flashing the Heltec overwrites Meshtastic. Dump the original flash **first** — it is the only way back to the existing install *and its settings*:
 
 ```powershell
-python -m esptool --port COM3 --baud 921600 write-flash 0 backups/heltec-meshtastic-full.bin
+python -m esptool --port COM3 --baud 921600 read-flash 0 ALL backups/heltec-meshtastic-full.bin   # before flashing
+python -m esptool --port COM3 --baud 921600 write-flash 0 backups/heltec-meshtastic-full.bin      # to restore
 ```
 
-(Or flash fresh via the [Meshtastic web flasher](https://flasher.meshtastic.org/).) Stock XIAO binaries live in `reference/drone-mesh-mapper/firmware/`.
+`backups/` is git-ignored on purpose: a full flash image contains your node's private keys and channel configuration, so it should never be committed. Failing that, reflash from scratch with the [Meshtastic web flasher](https://flasher.meshtastic.org/) — you keep the firmware but lose the settings. Stock XIAO binaries are in the upstream repo's `firmware/` directory.
 
 ## Notes
 
-- Receive-only: nothing transmits. BLE scanning + WiFi promiscuous listening.
-- WiFi Remote ID detection is fixed on channel 6 (upstream behavior); BLE catches the common broadcast path.
+- Both sniffer boards are receive-only — neither transmits. (`test-transmitter/` is a separate bench tool that does transmit, deliberately.)
 - Timestamps are relative ("seen 37s ago") — no RTC on either board.
+
+## Credits and licence
+
+- Detection firmware is derived from [`colonelpanichacks/drone-mesh-mapper`](https://github.com/colonelpanichacks/drone-mesh-mapper) (MIT), on [Colonel Panic's Mesh-Detect](https://colonelpanic.tech/) hardware.
+- `opendroneid.c/h`, `wifi.c`, `odid_wifi.h` are the [OpenDroneID reference library](https://github.com/opendroneid/opendroneid-core-c), © 2019 Intel Corporation, Apache-2.0. Original copyright headers are preserved in those files.
+- Everything else here is MIT.
