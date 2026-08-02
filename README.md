@@ -48,6 +48,8 @@ USB serial (115200) still prints the full detection JSON per the stock firmware.
 - Records merge with XIAO detections by UAS ID, and the channel shown on the transport line identifies the source: **ch 6 = XIAO**, anything else = Heltec's own radio.
 - Build with `-DENABLE_WIFI_SCAN=0` for the display-only firmware.
 
+The channel shown is **the channel the receiver was tuned to**, not necessarily the drone's own channel. 2.4 GHz channels are ~20 MHz wide but spaced 5 MHz apart, so a strong transmitter is received on neighbouring channels as well — bench-verified: a channel 3 transmitter is picked up on channels 2, 3 and 4. Treat it as approximate, and as a reliable source indicator only when it reads exactly 6 versus clearly away from 6.
+
 Note this adds Wi-Fi **Beacon** coverage only. Wi-Fi NAN Remote ID is spec-locked to channel 6, so the XIAO already captures all of it. Both boards are 2.4 GHz only — 5 GHz Remote ID is out of reach either way.
 
 ### `test-transmitter/` — bench test drone (optional)

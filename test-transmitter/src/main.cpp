@@ -22,7 +22,9 @@
 #include "opendroneid.h"
 #include "odid_wifi.h"
 
-static const int      TX_CHANNEL   = 6;     // receiver listens here
+// Channel 6 is where the XIAO listens; anything else can only be picked up by
+// the Heltec's channel-hopping scan, which is a clean way to test that path.
+static const int      TX_CHANNEL   = 3;
 static const uint32_t TX_PERIOD_MS = 1000;
 static const char    *AP_SSID      = "ODID-BENCH-TX";
 
