@@ -1,5 +1,7 @@
 # Standalone Drone ID Sniffer
 
+<img width="3072" height="4080" alt="2026-08-03 11 04 06" src="https://github.com/user-attachments/assets/6d50572c-77c2-402d-83c9-cb5b13f8cbf1" />
+
 A self-contained drone Remote ID sniffer built on the [Colonel Panic Mesh-Detect](https://colonelpanic.tech/) carrier board — no phone, no laptop, no mesh required. Detections appear on the built-in OLED.
 
 ## Hardware
@@ -11,6 +13,8 @@ A self-contained drone Remote ID sniffer built on the [Colonel Panic Mesh-Detect
 | ESP32-C3 (bench only) | Optional test transmitter, see `test-transmitter/` | COM9 |
 
 The Mesh-Detect carrier wires XIAO GPIO5 (TX) → Heltec GPIO19 (RX) at 115200 8N1. LoRa/Meshtastic is not used.
+
+3D printed case [here](https://makerworld.com/en/models/1795881-mesh-detect-case#profileId-1914570). 
 
 ## Coverage
 
