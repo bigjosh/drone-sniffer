@@ -48,7 +48,7 @@ USB serial (115200) still prints the full detection JSON per the stock firmware.
 - Tracks up to 32 drones, keyed by UAS ID with MAC fallback (records merge when a MAC-only drone later reveals its ID).
 - Records expire after **5 minutes** unseen; table-full evicts the least recently seen.
 - OLED UI: header `n/m` (current record / total). With no drones: `0/0 — No drones detected`. Per record: last-seen age, ID (or MAC), transport + RSSI, pilot location.
-- Screen is rotated 180° (`DISPLAY_ROTATION` at the top of `src/main.cpp` — set `U8G2_R0` for the default orientation).
+- Screen orientation is set by `DISPLAY_ROTATION` at the top of `src/main.cpp`: `U8G2_R0` for the board's default, `U8G2_R2` to flip it 180°.
 - Auto-advances every 4 s; PRG button advances immediately.
 - White LED blinks on every received detection.
 - USB serial (115200) accepts the same JSON lines as the UART — plus `dump`, `status`, `reset`, and `backdate N` commands — so the whole UI is testable from a PC.

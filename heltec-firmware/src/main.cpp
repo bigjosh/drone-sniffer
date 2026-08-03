@@ -53,7 +53,7 @@ static const uint32_t RENDER_MS  = 250;
 static const uint32_t LED_MS     = 80;    // RX blink duration
 
 // U8G2_R0 = default orientation, U8G2_R2 = rotated 180 degrees.
-#define DISPLAY_ROTATION U8G2_R2
+#define DISPLAY_ROTATION U8G2_R0
 
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(DISPLAY_ROTATION, PIN_OLED_RST, PIN_OLED_SCL, PIN_OLED_SDA);
 
