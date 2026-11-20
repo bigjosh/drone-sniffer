@@ -227,7 +227,10 @@ static void wifiSniffCallback(void *buf, wifi_promiscuous_pkt_type_t type) {
   static const uint8_t nan_dest[6] = {0x51, 0x6f, 0x9a, 0x01, 0x00, 0x00};
   if (memcmp(nan_dest, &payload[4], 6) == 0) {
     memset(&rfUas, 0, sizeof(rfUas));
-    if (odid_wifi_receive_message_pack_nan_action_frame(&rfUas, nullptr, payload, length) == 0) {
+    // The decoder copies the sender address into this buffer (wifi.c,
+    // memcpy(mac, mgmt->sa, 6)), so it must not be null.
+    char nan_mac[6];
+    if (odid_wifi_receive_message_pack_nan_action_frame(&rfUas, nan_mac, payload, length) == 0) {
       queueFromUas(&payload[10], pkt->rx_ctrl.rssi);
     }
     return;
